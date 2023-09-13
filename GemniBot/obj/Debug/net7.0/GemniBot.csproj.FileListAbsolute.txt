@@ -25,3 +25,13 @@ D:\c#\GemniBot\GemniBot\obj\Debug\net7.0\refint\GemniBot.dll
 D:\c#\GemniBot\GemniBot\obj\Debug\net7.0\GemniBot.pdb
 D:\c#\GemniBot\GemniBot\obj\Debug\net7.0\GemniBot.genruntimeconfig.cache
 D:\c#\GemniBot\GemniBot\obj\Debug\net7.0\ref\GemniBot.dll
+D:\c#\GemniBot\GemniBot\bin\Debug\net7.0\Microsoft.Bcl.AsyncInterfaces.dll
+D:\c#\GemniBot\GemniBot\bin\Debug\net7.0\Microsoft.Extensions.Configuration.dll
+D:\c#\GemniBot\GemniBot\bin\Debug\net7.0\Microsoft.Extensions.Configuration.Abstractions.dll
+D:\c#\GemniBot\GemniBot\bin\Debug\net7.0\Microsoft.Extensions.Configuration.Binder.dll
+D:\c#\GemniBot\GemniBot\bin\Debug\net7.0\Microsoft.Extensions.Http.dll
+D:\c#\GemniBot\GemniBot\bin\Debug\net7.0\Microsoft.Extensions.Logging.dll
+D:\c#\GemniBot\GemniBot\bin\Debug\net7.0\Microsoft.Extensions.Logging.Abstractions.dll
+D:\c#\GemniBot\GemniBot\bin\Debug\net7.0\Microsoft.Extensions.Options.dll
+D:\c#\GemniBot\GemniBot\bin\Debug\net7.0\Microsoft.Extensions.Primitives.dll
+D:\c#\GemniBot\GemniBot\bin\Debug\net7.0\OpenAI_API.dll

@@ -3,6 +3,8 @@ using System.Threading.Channels;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Newtonsoft.Json;
+using OpenAI_API;
 
 namespace GemniBot;
 
@@ -69,6 +71,27 @@ public class InfoModule : ModuleBase<SocketCommandContext>
         ReplyAsync(echo);
         Console.WriteLine($"Sent message: {echo}");
         return Task.CompletedTask;
+    }
+
+    [Command("ask")]
+    [Summary("Answering users question")]
+
+    public async Task AskAsync([Remainder] [Summary("The text to echo")] string echo)
+    {
+        string json = await File.ReadAllTextAsync("key.json");
+        Key openAiKey = JsonConvert.DeserializeObject<Key>(json)!;
+        string key = openAiKey.OpenAIKey;
+        
+        OpenAIAPI api = new OpenAIAPI(new APIAuthentication(key));
+        var chat = api.Chat.CreateConversation();
+        chat.AppendSystemMessage("You are a walking wikipedia, you know everything. Give the right answers for users");
+        chat.AppendUserInput("How much does iphone 13 cost?");
+        chat.AppendExampleChatbotOutput("According to Apple.com Iphone 13 costs 999$");
+        chat.AppendUserInput("Is this an animal? House");
+        chat.AppendExampleChatbotOutput("No");
+        chat.AppendUserInput(echo);
+        string answer = await chat.GetResponseFromChatbotAsync();
+        await ReplyAsync(answer);
     }
     
 }

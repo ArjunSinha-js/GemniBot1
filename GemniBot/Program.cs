@@ -21,8 +21,12 @@ class Program
         TokenData tokenData = JsonConvert.DeserializeObject<TokenData>(json)!;
         string token = tokenData.Token;
 
-        
-        _client = new DiscordSocketClient();
+        var config = new DiscordSocketConfig()
+        {
+            GatewayIntents = GatewayIntents.All
+        };
+
+        _client = new DiscordSocketClient(config);
         _client.Log += Log;
 
         _commands = new CommandService();
