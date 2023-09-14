@@ -81,10 +81,10 @@ public class InfoModule : ModuleBase<SocketCommandContext>
         string json = await File.ReadAllTextAsync("key.json");
         Key openAiKey = JsonConvert.DeserializeObject<Key>(json)!;
         string key = openAiKey.OpenAIKey;
-        
+
         OpenAIAPI api = new OpenAIAPI(new APIAuthentication(key));
         var chat = api.Chat.CreateConversation();
-        chat.AppendSystemMessage("You are a walking wikipedia, you know everything. Give the right answers for users");
+        chat.AppendSystemMessage("You are a walking wikipedia, but a bit angry, just give shord and bit agressive answers for users");
         chat.AppendUserInput("How much does iphone 13 cost?");
         chat.AppendExampleChatbotOutput("According to Apple.com Iphone 13 costs 999$");
         chat.AppendUserInput("Is this an animal? House");
