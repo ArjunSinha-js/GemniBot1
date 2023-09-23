@@ -93,6 +93,30 @@ public class InfoModule : ModuleBase<SocketCommandContext>
         string answer = await chat.GetResponseFromChatbotAsync();
         await ReplyAsync(answer);
     }
+
+    [Command("tell")]
+    [Summary("Tell the short version of text")]
+
+    public async Task Telling([Remainder] [Summary("Tell the short version of text")] string echo)
+    {
+        string json = await File.ReadAllTextAsync("key.json");
+        Key openAiKey = JsonConvert.DeserializeObject<Key>(json)!;
+        string key = openAiKey.OpenAIKey;
+
+        OpenAIAPI api = new OpenAIAPI(new APIAuthentication(key));
+        var chat = api.Chat.CreateConversation();
+        chat.AppendSystemMessage("You are an assistant moderator. You get messages from users, and you need to summarize what the person in the message is saying in a concise, to the point and without water");
+        chat.AppendUserInput("I would like to draw your attention to an unpleasant situation related to the withdrawal of funds. At the moment my account on the site shows a write-off of UAH 200, but these funds have not arrived to my bank account."
++" The details of the transaction are as follows: Amount: UAH 200         Date: 23.09.2023         Transaction Number: TRX123456789"
++ " Please clarify this situation and help me to return the funds to my bank account. If you need additional information, please let me know and I will provide all the necessary data.");
+        chat.AppendExampleChatbotOutput("Problem: cannot withdrawal. Amount: 200UAH. Date: 23.09.2023. Transaction Number: TRX123456789"
+        +"Retelled message text: I'm facing an issue with a withdrawal of UAH 200. My account shows the deduction, but the funds haven't reached my bank account. "
+        +"Please investigate and assist in returning the funds to my bank account. I can provide more information if needed.");
+        chat.AppendUserInput(echo);
+        string answer = await chat.GetResponseFromChatbotAsync();
+        await ReplyAsync(answer);
+
+    }
     
 }
 [Group("sample")]
