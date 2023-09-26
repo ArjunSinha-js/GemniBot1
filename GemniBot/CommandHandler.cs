@@ -42,6 +42,8 @@ public class CommandHandler
         Console.WriteLine($"Message chanel: {message.Channel}");
         Console.WriteLine($"Message: {message}");
         if (message == null) return;
+
+        
         
         int argPos = 0;
         
@@ -60,9 +62,13 @@ public class CommandHandler
     }
 }
 
+
 public class InfoModule : ModuleBase<SocketCommandContext>
 {
 
+    
+
+    
     [Command("say")]
     [Summary("Echoes a message.")]
     public Task SayAsync([Remainder] [Summary("The text to echo")] string echo)
