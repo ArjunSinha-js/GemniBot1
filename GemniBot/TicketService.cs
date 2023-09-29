@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace GemniBot;
 using Discord;
@@ -10,10 +11,20 @@ using Newtonsoft;
 
 public class TicketService : ModuleBase<SocketCommandContext>
 {
+
+    private readonly BloggingContext _database;
+    
+    public TicketService(BloggingContext database)
+    {
+        _database = database;
+    }
+
     [Command("createchannel")]
     public async Task CreateTextChannelAsync()
     {
+        
         Console.WriteLine("Start");
+        
         string json = await File.ReadAllTextAsync("botconfig.json");
 
         Console.WriteLine(json);
@@ -24,50 +35,39 @@ public class TicketService : ModuleBase<SocketCommandContext>
         
         var category = guild.GetCategoryChannel(config.Category);
         
-
         Console.WriteLine($"{guild} - Server Name");
         
         Console.WriteLine($"{category} - Category");
-     
-        string usersJson = await File.ReadAllTextAsync("users.json");
-        Console.WriteLine(usersJson);
-        var users = JsonConvert.DeserializeObject<List<User>>(usersJson)!;
-        Console.WriteLine(users);
-        ulong result = 0;
-        bool a = false;
-        foreach (var u in users)
-        {
-            if (Context.User.Id == u.Id)
-            {
-                result = u.ChatId;
-                a = true;
-                break;
-            }
-        }
 
-        if (a == false)
+        var userFromDb = await _database.Users.FirstOrDefaultAsync(x => x.Id == Context.User.Id);
+        Console.WriteLine($"id in database {userFromDb}");
+        if (userFromDb is null)
         {
+            
             var textChannel = await guild.CreateTextChannelAsync($"Ticket from {Context.Message.Author}", properties =>
             {
                 properties.CategoryId = category.Id;
             });
-           
-            User user = new User() { ChatId = textChannel.Id, Id = Context.User.Id };
-            users.Add(user);
-            Console.WriteLine("Start convert");
-            string output = JsonConvert.SerializeObject(users);
-            Console.WriteLine("End");
+            
+            await _database.AddAsync(new User(){Id = Context.User.Id, ChatId = textChannel.Id});
+            
+                await _database.SaveChangesAsync();
+                
+            Console.WriteLine("Saved");
 
-            await File.WriteAllTextAsync("users.json", output);
-        
             await textChannel.SendMessageAsync($"Here is new text channel {textChannel.Id}");
             await ReplyAsync($"Text channel '{textChannel.Name}' has been created!");
             return;
         }
 
-       var textChannelRes = guild.GetTextChannel(result); 
+       var textChannelRes = guild.GetTextChannel(userFromDb.ChatId);
        await textChannelRes.SendMessageAsync("Welcome to channel");
-       
+  
+
+
+
+
+
 
     }
 
@@ -76,13 +76,10 @@ public class TicketService : ModuleBase<SocketCommandContext>
     public async Task SentMessageInChannel([Remainder] string echo)
     {
         Console.WriteLine("Start");
-        string usersJson = await File.ReadAllTextAsync("users.json");
-        
-        var users = JsonConvert.DeserializeObject<List<User>>(usersJson);
 
-        ulong usersChat = 0;
+        var userFromDb = await _database.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == Context.User.Id);
         
-        bool result = false;
+        Console.WriteLine($"Id from Database - {userFromDb}");
         
         string json = await File.ReadAllTextAsync("botconfig.json");
 
@@ -93,21 +90,10 @@ public class TicketService : ModuleBase<SocketCommandContext>
         var guild = Context.Client.GetGuild(config.Server);
         
         var category = guild.GetCategoryChannel(config.Category);
-        foreach (var user in users)
+
+        if (userFromDb != null)
         {
-            Console.WriteLine("ForEach");
-            if (user.Id == Context.User.Id)
-            {
-                Console.WriteLine("f");
-                usersChat = user.ChatId;
-                result = true;
-                break;
-            }
-        }
-        Console.WriteLine(result);
-        if (result)
-        {
-            var textChannel = guild.GetTextChannel(usersChat);
+            var textChannel = guild.GetTextChannel(userFromDb.ChatId);
             await textChannel.SendMessageAsync(echo);
         }
     }

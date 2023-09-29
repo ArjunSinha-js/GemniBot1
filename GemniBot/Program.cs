@@ -2,39 +2,69 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using GemniBot;
-using Newtonsoft.Json;
+using Newtonsoft.Json;    using System;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
+
 
 class Program
 {
 
-    private CommandService _commands;
-    private DiscordSocketClient _client;
-    
-    public static async Task Main(string[] args)
-    {
-        await new Program().MainAsync();
-    }
 
-    public async Task StartBot()
+    private CommandService _commands;
+
+    private readonly IServiceProvider _serviceProvider;
+
+    public Program()
     {
-        string json = await File.ReadAllTextAsync("token.json");
-        TokenData tokenData = JsonConvert.DeserializeObject<TokenData>(json)!;
-        string token = tokenData.Token;
+         _serviceProvider = CreateProvider();
+    }
+    static IServiceProvider CreateProvider()
+    {
 
         var config = new DiscordSocketConfig()
         {
             GatewayIntents = GatewayIntents.All
         };
+        var collection = new ServiceCollection()
+            .AddSingleton(config)
+            .AddSingleton<DiscordSocketClient>()
+            .AddSingleton<CommandService>()
+            .AddSingleton<CommandHandler>()
+            .AddSingleton<TicketService>();
+        collection.AddDbContext<BloggingContext>();
+        
+        //...
+        return collection.BuildServiceProvider();
+    }
+    
+    public static async Task Main(string[] args)
+    {
+        
+        await new Program().MainAsync();
+        
+    }
 
-        _client = new DiscordSocketClient(config);
+    public async Task StartBot()
+    {
+
+        string json = await File.ReadAllTextAsync("token.json");
+        TokenData tokenData = JsonConvert.DeserializeObject<TokenData>(json)!;
+        string token = tokenData.Token;
+
+        
+        var _client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
+
         _client.Log += Log;
 
-        _commands = new CommandService();
+        _commands = _serviceProvider.GetRequiredService<CommandService>();
         
-        var commandHandler = new CommandHandler(_client, _commands);
+            
+        var commandHandler = _serviceProvider.GetRequiredService<CommandHandler>();
         await commandHandler.InstallCommandsAsync();
         commandHandler.SetTextChannelPrefix("!");
         
+
         await _client.LoginAsync(TokenType.Bot, token);
         await _client.StartAsync();
         await Task.Delay(-1);
@@ -57,5 +87,7 @@ class Program
         Console.WriteLine(msg.ToString());
         return Task.CompletedTask;
     }
-    
+
+
+  
 }
